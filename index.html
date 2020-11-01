@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+
+</head>
+<body>
+
+
+<div id="app">
+    <el-container>
+        <el-aside width="200px">
+
+            <el-menu :default-openeds="['1']">
+                <el-menu-item index="1" @click="index=1">项目</el-menu-item>
+                <el-menu-item index="2" @click="index=2">其他</el-menu-item>
+            </el-menu>
+
+
+        </el-aside>
+        <el-container>
+            <el-header>小芳软件包管理平台</el-header>
+            <el-main v-if="index==1">
+
+                <!--
+                 项目主页
+                -->
+                <el-row :gutter="20">
+                    <el-col :span="6" v-for="(project,index) in projects">
+                        <el-card class="box-card" shadow="hover" v-bind:style="{background:color[index%color.length]}">
+                            <div class="item-card" @click="getProjectFile(project)">
+                                <span>{{project}}</span>
+                            </div>
+                        </el-card>
+                    </el-col>
+                </el-row>
+
+            </el-main>
+            <el-main v-if="index==2">Second</el-main>
+            <el-main v-if="index==3">Three</el-main>
+
+
+            <!--
+             项目的详情页面
+            -->
+            <el-main v-if="index==4" class="index4">
+
+                <el-page-header @back="index=1" v-bind:content="selectProject">
+                </el-page-header>
+
+                <div style="margin-top: 20px">
+                    <div class="item-file" v-for="file in selectProjectFile">
+                        <span style="margin-left: 20px">{{file}}</span>
+                        <div style="margin-right: 20px">
+                            <el-link :underline="false" type="primary" icon="el-icon-download" @click="download(file)">
+                                下载
+                            </el-link>
+                            <el-link :underline="false" type="success" icon="el-icon-picture-outline"
+                                     @click="getQrCode(file)">生成二维码
+                            </el-link>
+                        </div>
+                    </div>
+                </div>
+
+            </el-main>
+
+
+            <el-footer>
+
+            </el-footer>
+        </el-container>
+    </el-container>
+
+
+    <!--
+
+    弹出
+    -->
+    <el-dialog
+            title="扫码下载"
+            :visible.sync="dialogVisible"
+            width="30%"
+            :before-close="handleClose">
+
+        <el-image :src="downSrcUrl" style="width: 200px;height: 200px"></el-image>
+
+        <span slot="footer" class="dialog-footer">
+    <el-button @click="dialogVisible = false">取 消</el-button>
+    <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+  </span>
+    </el-dialog>
+
+
+</div>
+
+
+<script>
+
+
+    var rootUrl = "http://localhost:8080/pm/";
+
+    var listProject = rootUrl + "list/dir";
+
+    var listFile = rootUrl + "list/file";
+
+    var download = rootUrl + "file/down";
+
+    var qrCode = rootUrl + "qrimage"
+
+
+    const app = new Vue({
+        el: '#app',
+        data: {
+            index: 1,//控制页面渲染的主要 变量
+            /**
+             * 4  主项目的二级页面
+             *
+             *
+             *
+             *
+             *
+             */
+
+            projects: [],
+            color: ["#67C23A", "#E6A23C", "#F56C6C", "#909399", "#409EFF"],
+
+
+            //选中的项目名称
+            selectProject: "",
+
+            /**
+             * 选中的项目的项目文件列表
+             */
+            selectProjectFile: [],
+
+
+            dialogVisible: false,
+            downSrcUrl: "",
+
+
+        },
+
+
+        created() {
+
+            // this.axiosPost("get", "http://www.baidu.com", {});
+
+
+            axios.get(listProject, {}).then((res) => {
+                this.projects = res.data.data;
+            })
+
+
+        },
+
+        methods: {
+
+            //封装axios封装post请求
+            axiosPost(method, url, data) {
+                let result = axios({
+                    method: method,
+                    url: url,
+                    data: data,
+                    transformRequest: [function (data) {
+                        let ret = '';
+                        for (let i in data) {
+                            ret += encodeURIComponent(i) + '=' + encodeURIComponent(data[i]) + "&";
+                        }
+                        return ret;
+                    }],
+                    header: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }).then(resp => {
+                    return resp.data;
+                }).catch(error => {
+                    return "exception=" + error;
+                });
+                return result;
+            },
+
+
+            getProjectFile(name) {
+                this.index = 4;
+                this.selectProject = name;
+                axios.get(listFile + "?project=" + name).then((res) => {
+                    this.selectProjectFile = res.data.data;
+                })
+            },
+
+            download(url) {
+                let path = this.selectProject + "/" + url;
+                location.href = download + "?path=" + path;
+            },
+
+
+            getQrCode(url) {
+                let path = this.selectProject + "/" + url;
+                this.downSrcUrl = qrCode + "?url=" + path;
+                this.dialogVisible = true;
+
+            }
+
+        },
+
+
+    })
+</script>
+</body>
+<style>
+
+    .el-header, .el-footer {
+        background-color: #B3C0D1;
+        color: #333;
+        text-align: center;
+        line-height: 60px;
+    }
+
+    .el-aside {
+        background-color: #D3DCE6;
+        color: #333;
+        text-align: center;
+        line-height: 200px;
+    }
+
+    .el-main {
+        background-color: #E9EEF3;
+        color: #333;
+        text-align: center;
+        line-height: 160px;
+    }
+
+    body > .el-container {
+        margin-bottom: 40px;
+    }
+
+    .el-container:nth-child(5) .el-aside,
+    .el-container:nth-child(6) .el-aside {
+        line-height: 260px;
+    }
+
+    .el-container:nth-child(7) .el-aside {
+        line-height: 320px;
+    }
+
+
+    .item-card {
+        color: #fff;
+    }
+
+
+    /*   idnex==4    */
+
+    .index4 .item-file {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        height: 80px;
+        border: 1px solid rgba(221, 221, 221, 0.14);
+        border-radius: 3px;
+        align-items: center;
+        margin-bottom: 20px;
+        background: white;
+    }
+
+
+</style>
+</html>
