@@ -30,6 +30,9 @@ function axiosPost(method, url, data, callback) {
       'Content-Type': 'application/x-www-form-urlencoded'
     }
   }).then(resp => {
+    if (isIntercept(resp.data)) {
+      return;
+    }
     callback(resp.data);
   }).catch(error => {
     return "exception=" + error;
@@ -45,10 +48,22 @@ function postReal(path, method, data, callback) {
 function getReal(path, data, callback) {
   path = Urls.urlRoot + path;
   axios.get(path + "?" + data).then(resp => {
+    if (isIntercept(resp.data)) {
+      return;
+    }
     callback(resp.data);
   }).catch(error => {
     return "exception=" + error;
   });
+}
+
+
+function isIntercept(data) {
+  console.log(this)
+  if (data.data.code == 401) {
+    return true
+  }
+  return false;
 }
 
 
