@@ -11,6 +11,7 @@ import HtmlInner from "../components/generate/HtmlInner";
 import CrmMenu from "../components/mainPage/crm/CrmMenu";
 import CrmPreViewer from "../components/mainPage/crm/CrmPreViewer";
 import Login from "../components/Login";
+import AutoTest from "../components/mainPage/autoTest/AutoTest";
 
 Vue.use(Router)
 
@@ -62,6 +63,10 @@ export default new Router({
           path: "/CrmPreViewer",
           name: "CrmPreViewer",
           component: CrmPreViewer,
+        }, {
+          path: "/AutoTest",
+          name: "AutoTest",
+          component: AutoTest,
         }
       ],
     },
