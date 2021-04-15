@@ -75,11 +75,11 @@
         axios.post(Urls.urlRoot + "check/all").then((res) => {
 
           let table = [];
-          res.data.data.forEach((v) => {
-            if (v.projectName.indexOf("@tmp") != -1) {
-              table.push(v);
+          for (let i = 0; i < res.data.data.length; i++) {
+            if (res.data.data[i]["projectName"].indexOf("@tmp") == -1) {
+              table.push(res.data.data[i]);
             }
-          })
+          }
           this.tableData = table;
         })
       },
