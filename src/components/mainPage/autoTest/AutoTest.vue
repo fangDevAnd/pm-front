@@ -7,10 +7,10 @@
     <el-row>
       <el-col :span="12">
         <!--左边操作部分-->
-        <el-card class="box-card" v-for="i in initCount">
+        <el-card class="box-card" v-for="i in innerItems.length">
           <div slot="header" class="clearfix">
-            <span>流水线{{i}}</span>
-            <el-button style="float: right; padding: 3px 0" type="text">删除</el-button>
+            <span>流水线{{i-1}}</span>
+            <el-button style="float: right; padding: 3px 0" type="text" @click="delItem(i)">删除</el-button>
             <el-button style="float: right; padding: 3px 0" type="text" @click="addItem">添加</el-button>
           </div>
           <!--
@@ -70,8 +70,10 @@
     </el-row>
 
     <div class="exec-auto">
-      <el-button type="success" @click="pipeline(0)">执行流水线</el-button>
+      <el-button type="success" @click="execPipe">执行流水线</el-button>
+      <el-button type="warning" @click="savePipeLinePop">保存</el-button>
     </div>
+
 
   </div>
 </template>
@@ -79,16 +81,16 @@
 <script>
 
   //存放流水线数据的全局缓存
-  window.items = []
-
+  import Urls from "../../../util/Urls";
   import axios from "axios";
+
+  window.items = []
 
   export default {
     name: "AutoTest",
     data() {
       return {
         innerItems: [],
-        initCount: 0,
         curExecIndex: 1,
       }
     },
@@ -189,44 +191,101 @@
       },
 
       addItem() {
-        this.initCount++;
+
+        let length = this.innerItems.length;
         this.innerItems.push({
           method: "POST",
-          index: this.initCount - 1,
+          index: length,
+        })
+      },
+
+      delItem(index) {
+        console.log(index)
+        this.innerItems.splice(index - 1, 1);
+        window.items.splice(index - 1, 1);
+      },
+
+      getDetail(id) {
+        axios.post(Urls.urlRoot + "autoTest/item/all?id=" + id).then((res) => {
+          let data = res.data.data;
+          if (data[0].innerItems != null) {
+            this.innerItems = JSON.parse(data[0].innerItems);
+          } else {
+            this.innerItems.push({
+              method: "POST",
+              index: 0,
+            })
+          }
+        })
+      },
+
+
+      savePipeLinePop() {
+        this.$prompt('请输入案例描述', '案例描述', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+        }).then(({value}) => {
+          this.savePipeLine(value);
+        }).catch(() => {
+
+        });
+      },
+
+
+      //保存当前的pipeLine
+      savePipeLine(descr) {
+        this.clearAuth(false);
+
+        //添加一个item
+        axios.post(Urls.urlRoot + "autoTest/item/add", {
+          autoTestId: this.$route.query.autoTestId,
+          descr: descr,
+          initCount: this.innerItems.length,
+          innerItems: JSON.stringify(this.innerItems)
+        }).then((res) => {
+
         })
 
-      }
 
+      },
+
+
+      execPipe() {
+        this.pipeline(0);
+        //挂载
+        window.pipeline = this.pipeline;
+        this.clearAuth(true);
+      },
+
+      clearAuth(boolClear) {
+        if (!boolClear) {
+          axios.disableDefault = false;
+          axios.defaults.withCredentials = true;
+        } else {
+          axios.disableDefault = true;
+          axios.defaults.withCredentials = false;
+        }
+      }
 
     },
 
+
     created() {
-      this.initCount++;
-      this.innerItems.push({
-        method: "POST",
-        index: this.initCount - 1
-      })
-      //挂载
-      window.pipeline = this.pipeline;
-      axios.disableDefault = true;
-      axios.defaults.withCredentials = false;
-      //清除相关属性
-      axios.interceptors.request.use(
-        config => {
-          delete config.headers["x-xsrf-token"]
-          delete config.headers["Authorization"]
-          delete config.headers["X-XSRF-TOKEN"]
-          return config;
-        },
-        error => {
-          return Promise.error(error);
-        }
-      );
+
+      let id = this.$route.query.id;
+      if (id != null) {
+        this.getDetail(id);
+      } else {
+        this.innerItems.push({
+          method: "POST",
+          index: 0
+        })
+      }
+
     },
 
     destroyed() {
-      axios.disableDefault = false;
-      axios.defaults.withCredentials = true;
+      this.clearAuth(false);
     }
 
 

@@ -1,15 +1,6 @@
 <template>
-  <!--测试项目
-  　　项目名称, 创建时间　
-  　　
-  -->
 
   <div class="container">
-
-
-    <div>
-      <el-button type="primary" @click="dialogFormVisible=true">添加项目</el-button>
-    </div>
 
 
     <el-table
@@ -21,14 +12,14 @@
         width="180">
       </el-table-column>
       <el-table-column
-        label="项目名称"
-        prop="name"
+        label="描述信息"
+        prop="descr"
         width="180">
       </el-table-column>
 
       <el-table-column
-        label="创建时间"
-        prop="createTime"
+        label="初始化脚本数量"
+        prop="initCount"
         width="180">
       </el-table-column>
 
@@ -36,7 +27,7 @@
         <template slot-scope="scope">
           <el-button
             size="mini"
-            @click="handleRouter(scope.$index, scope.row)">查看测试列表
+            @click="handleRouter(scope.$index, scope.row)">查看
           </el-button>
           <el-button
             size="mini"
@@ -50,20 +41,6 @@
     </el-table>
 
 
-    <!-- Form -->
-    <el-dialog title="添加项目" modal="false" append-to-body="true" :visible.sync="dialogFormVisible">
-      <el-form :model="testProject">
-        <el-form-item label="项目名称" :label-width="60">
-          <el-input v-model="testProject.name" autocomplete="off"></el-input>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="addPro">确 定</el-button>
-      </div>
-    </el-dialog>
-
-
   </div>
 
 
@@ -74,18 +51,15 @@
   import Urls from "../../../util/Urls";
 
   export default {
-    name: "TestProject",
+    name: "TestItemList",
     data() {
       return {
         tableData: [],
-
-        dialogFormVisible: false,
-        testProject: {}
       }
     },
     methods: {
       handleRouter(index, row) {
-        this.$router.push("/AutoTestList?projectId=" + row["id"]);
+        this.$router.push("/AutoTest?id=" + row["id"] + "&autoTestId=" + this.$route.query.autoTestId);
       },
       handleDelete(index, row) {
         this.$confirm('此操作将永久删除该工程, 是否继续?', '提示', {
@@ -93,42 +67,29 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-
-          axios.post(Urls.urlRoot + "autoTest/project/del", {
+          axios.post(Urls.urlRoot + "autoTest/item/del", {
             id: row["id"]
           }).then((res) => {
-
             this.getList();
-
           })
         }).catch(() => {
 
         });
       },
 
-      addPro() {
-
-        axios.post(Urls.urlRoot + "autoTest/project/add", this.testProject).then((res) => {
-          this.getList();
-        })
-
-
-      },
-
-
       getList() {
-        axios.post(Urls.urlRoot + "autoTest/project/all").then((res) => {
+        let autoTestId = this.$route.query.autoTestId;
+        axios.post(Urls.urlRoot + "autoTest/item/all?autoTestId=" + autoTestId).then((res) => {
           this.tableData = res.data.data;
         })
       },
-
-
     },
     created() {
 
       this.getList();
 
     }
+
 
   }
 </script>
@@ -144,8 +105,5 @@
     position: fixed;
   }
 
-  .v-modal {
-    display: none;
-  }
 
 </style>
