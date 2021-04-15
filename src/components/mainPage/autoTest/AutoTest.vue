@@ -179,9 +179,6 @@
         }
         inner[index].desc = desc;
         this.innerItems = inner;
-
-        console.log(this.innerItems);
-
         //存放执行的脚本数据
         window.items[index]["resp"] = data;
 
@@ -194,15 +191,9 @@
       addItem() {
         this.initCount++;
         this.innerItems.push({
-          url: "http://123.56.93.253:8084/pm/pm/list/dir",
-          parse: "if(data.code==200){\n" +
-            "}",
           method: "POST",
           index: this.initCount - 1,
-          param: "{\"account\":\"fang\",\"password\":\"123\"}",
-          header: "{Authorization:resp.data.token}"
         })
-
 
       }
 
@@ -212,18 +203,30 @@
     created() {
       this.initCount++;
       this.innerItems.push({
-        url: "http://123.56.93.253:8084/pm/userLogin",
-        parse: "if(data.code==200){\n" +
-          "    pipeline(1,data)\n" +
-          "}",
         method: "POST",
-        param: "{\"account\":\"fang\",\"password\":\"123\"}",
         index: this.initCount - 1
       })
       //挂载
       window.pipeline = this.pipeline;
+      axios.disableDefault = true;
+      axios.defaults.withCredentials = false;
+      //清除相关属性
+      axios.interceptors.request.use(
+        config => {
+          delete config.headers["x-xsrf-token"]
+          delete config.headers["Authorization"]
+          delete config.headers["X-XSRF-TOKEN"]
+          return config;
+        },
+        error => {
+          return Promise.error(error);
+        }
+      );
+    },
 
-
+    destroyed() {
+      axios.disableDefault = false;
+      axios.defaults.withCredentials = true;
     }
 
 
@@ -231,7 +234,6 @@
 </script>
 
 <style scoped>
-
 
   .container {
     width: 100%;

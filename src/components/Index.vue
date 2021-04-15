@@ -18,7 +18,16 @@
         <el-menu-item index="3" @click="changeRouter($event)" data-route="/LogcatQuery">日志分析</el-menu-item>
         <el-menu-item index="4" @click="changeRouter($event)" data-route="/UserBehavior">Lint代码检查</el-menu-item>
         <el-menu-item index="5" @click="changeRouter($event)" data-route="/CheckReport">依赖检查报告</el-menu-item>
-        <el-menu-item index="5" @click="changeRouter($event)" data-route="/AutoTest">自动测试</el-menu-item>
+        
+        <el-submenu index="7">
+          <template slot="title">
+            <i class="el-icon-location"></i>
+            <span>自动测试</span>
+          </template>
+          <el-menu-item index="7-1" @click="changeRouter($event)" data-route="/TestProject">测试项目</el-menu-item>
+        </el-submenu>
+
+
         <el-submenu index="6">
           <template slot="title">
             <i class="el-icon-location"></i>

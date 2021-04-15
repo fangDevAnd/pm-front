@@ -12,6 +12,7 @@ import CrmMenu from "../components/mainPage/crm/CrmMenu";
 import CrmPreViewer from "../components/mainPage/crm/CrmPreViewer";
 import Login from "../components/Login";
 import AutoTest from "../components/mainPage/autoTest/AutoTest";
+import TestProject from "../components/mainPage/autoTest/TestProject";
 
 Vue.use(Router)
 
@@ -67,7 +68,13 @@ export default new Router({
           path: "/AutoTest",
           name: "AutoTest",
           component: AutoTest,
+        },
+        {
+          path: "/TestProject",
+          name: "TestProject",
+          component: TestProject,
         }
+
       ],
     },
     {
