@@ -41,6 +41,11 @@ axios.interceptors.request.use(
 
 axios.interceptors.response.use(
   response => {
+
+    if (axios.disableDefault) {
+      return Promise.resolve(response);
+    }
+
     // 如果返回的状态码为200，说明接口请求成功，可以正常拿到数据
     // 否则的话抛出错误
     let status = response.data.code;
@@ -70,7 +75,12 @@ axios.interceptors.response.use(
       default:
         this.$message(response.data.msg);
     }
+
     return Promise.reject(response);
+  }, error => {
+    if (axios.disableDefault) {
+      return Promise.resolve(error);
+    }
   }
 );
 

@@ -1,8 +1,7 @@
 <template>
   <div class="container">
-
-
     <div>
+      <i class="el-icon-arrow-left" @click="$router.go(-1)">返回　</i>
       <el-button type="primary" @click="dialogFormVisible=true">添加测试</el-button>
     </div>
 
@@ -87,7 +86,7 @@
     },
     methods: {
       handleRouter(index, row) {
-        this.$router.push("/TestItemList?autoTestId=" + row["id"]);
+        this.$router.push("/TestItemList?autoTestId=" + row["id"] + "&type=" + row["type"]);
       },
       handleDelete(index, row) {
         this.$confirm('此操作将永久删除该工程, 是否继续?', '提示', {

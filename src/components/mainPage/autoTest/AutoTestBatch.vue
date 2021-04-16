@@ -1,7 +1,6 @@
 <template>
-
   <!--
-    自动测试的实现
+    自动批处理项目测试的实现
   -->
   <div class="container">
 
@@ -14,7 +13,7 @@
         <!--左边操作部分-->
         <el-card class="box-card" v-for="i in innerItems.length">
           <div slot="header" class="clearfix">
-            <span>流水线{{i-1}}</span>
+            <span>批处理{{i-1}}</span>
             <el-button style="float: right; padding: 3px 0" type="text" @click="delItem(i)">删除</el-button>
             <el-button style="float: right; padding: 3px 0" type="text" @click="addItem">添加</el-button>
           </div>
@@ -49,9 +48,6 @@
             <el-form-item label="请求参数">
               <el-input type="textarea" v-model="innerItems[i-1].param" 　placeholder="GET请求可以使用url传递参数"></el-input>
             </el-form-item>
-            <el-form-item label="结果处理">
-              <el-input type="textarea" v-model="innerItems[i-1].parse"></el-input>
-            </el-form-item>
 
 
           </el-form>
@@ -63,7 +59,7 @@
       <el-col :span="12" style="padding-right: 10px">
         　<!--右边控制台执行情况显示-->
         <el-steps direction="vertical" :active="curExecIndex" space="100px" finish-status="success">
-          <el-step :title="'流水线'+item.index"
+          <el-step :title="'批处理'+item.index"
                    v-for="item in innerItems">
             <el-input slot="description" type="textarea" :rows="10" style="width:400px" :value="item.desc">
             </el-input>
@@ -75,7 +71,7 @@
     </el-row>
 
     <div class="exec-auto">
-      <el-button type="success" @click="execPipe">执行流水线</el-button>
+      <el-button type="success" @click="execPipe">执行批处理</el-button>
       <el-button type="warning" @click="savePipeLinePop">保存</el-button>
     </div>
 
@@ -83,28 +79,27 @@
   </div>
 </template>
 
+
 <script>
 
-  //存放流水线数据的全局缓存
+  //存放批处理数据的全局缓存
   import Urls from "../../../util/Urls";
   import axios from "axios";
+
   import InnerMenu from "./menu/InnerMenu";
 
   window.items = []
 
   export default {
-    name: "AutoTest",
-    components: {InnerMenu},
+    name: "AutoTestBatch",
+    components: {
+      InnerMenu
+    },
     data() {
       return {
         innerItems: [],
-        curExecIndex: 1,
       }
     },
-
-    //属性
-    props: [],
-
 
     methods: {
 
@@ -114,8 +109,6 @@
        */
       pipeline(index, resp) {
         let item = this.innerItems[index];
-        this.curExecIndex = index + 1;
-
         item.index = index;
         if (resp == undefined) {
           item.resp = {};//空对象
@@ -150,6 +143,8 @@
           data: window.items[index]["param"]
         }).then((resp) => {
           this.processResult(resp, item);
+        }).catch(reason => {
+          console.log(reason)
         })
       },
 
@@ -177,16 +172,18 @@
           headers: window.items[index]["header"],
         }).then((resp) => {
           this.processResult(resp, item);
+        }).catch(reason => {
+          console.log(reason)
         })
       },
 
 
       processResult(resp, item) {
+        
         let data = resp.data;
         let index = item["index"];
         let desc = JSON.stringify(data);
         let inner = [];
-
         for (let i = 0; i < this.innerItems.length; i++) {
           inner.push(this.innerItems[i]);
         }
@@ -194,10 +191,6 @@
         this.innerItems = inner;
         //存放执行的脚本数据
         window.items[index]["resp"] = data;
-
-        //执行脚本处理代码
-        eval(item["parse"]);
-
 
       },
 
@@ -230,7 +223,6 @@
         })
       },
 
-
       savePipeLinePop() {
         this.$prompt('请输入案例描述', '案例描述', {
           confirmButtonText: '确定',
@@ -251,7 +243,7 @@
         axios.post(Urls.urlRoot + "autoTest/item/add", {
           autoTestId: this.$route.query.autoTestId,
           descr: descr,
-          type: 1,
+          type: 2,
           initCount: this.innerItems.length,
           innerItems: JSON.stringify(this.innerItems)
         }).then((res) => {
@@ -263,7 +255,11 @@
 
 
       execPipe() {
-        this.pipeline(0);
+        //同时执行
+        for (let i = 0; i < this.innerItems.length; i++) {
+          this.pipeline(i);
+        }
+
         //挂载
         window.pipeline = this.pipeline;
         this.clearAuth(true);

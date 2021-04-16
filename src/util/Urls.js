@@ -1,4 +1,5 @@
-const urlRoot = "http://123.56.93.253:8084/pm/"
+const urlRoot = "http://localhost:8080/pm/"
+
 export default {
   urlRoot
 }
