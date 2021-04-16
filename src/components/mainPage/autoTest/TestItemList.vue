@@ -2,6 +2,9 @@
 
   <div class="container">
 
+    <div>
+      <el-button type="primary" @click="dialogFormVisible=true">添加实例</el-button>
+    </div>
 
     <el-table
       :data="tableData"
@@ -41,6 +44,23 @@
     </el-table>
 
 
+    <!-- Form -->
+    <el-dialog title="添加测试实例" modal="false" append-to-body="true" :visible.sync="dialogFormVisible">
+      <el-form :model="autoTestPro">
+        <el-form-item label="类型" :label-width="150">
+          <el-select v-model="autoTestPro.type" placeholder="请选择类型">
+            <el-option label="流水线" value="1"></el-option>
+            <el-option label="批处理" value="2"></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="addTest">确 定</el-button>
+      </div>
+    </el-dialog>
+
+
   </div>
 
 
@@ -55,6 +75,7 @@
     data() {
       return {
         tableData: [],
+        autoTestPro: {},
       }
     },
     methods: {
@@ -83,6 +104,15 @@
           this.tableData = res.data.data;
         })
       },
+
+      addTest() {
+        let autoTestId = this.$route.query.autoTestId;
+        if (this.autoTestPro.type == 1) {
+          this.$router.push("/AutoTest?autoTestId=" + autoTestId);//this.$route.query.autoTestId
+        } else if (this.autoTestPro.type == 2) {
+          this.$router.push("/AutoTestBatch?autoTestId=" + autoTestId);
+        }
+      }
     },
     created() {
 

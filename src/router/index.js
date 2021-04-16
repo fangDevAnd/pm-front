@@ -15,6 +15,7 @@ import AutoTest from "../components/mainPage/autoTest/AutoTest";
 import TestProject from "../components/mainPage/autoTest/TestProject";
 import AutoTestList from "../components/mainPage/autoTest/AutoTestList";
 import TestItemList from "../components/mainPage/autoTest/TestItemList";
+import AutoTestBatch from "../components/mainPage/autoTest/AutoTestBatch";
 
 Vue.use(Router)
 
@@ -85,7 +86,12 @@ export default new Router({
           path: "/TestItemList",
           name: "TestItemList",
           component: TestItemList,
-        }
+        },
+        {
+          path: "/AutoTestBatch",
+          name: "AutoTestBatch",
+          component: AutoTestBatch,
+        },
       ],
     },
     {
