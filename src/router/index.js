@@ -16,6 +16,9 @@ import TestProject from "../components/mainPage/autoTest/TestProject";
 import AutoTestList from "../components/mainPage/autoTest/AutoTestList";
 import TestItemList from "../components/mainPage/autoTest/TestItemList";
 import AutoTestBatch from "../components/mainPage/autoTest/AutoTestBatch";
+import ComplexMultTaskPipeline from "../components/mainPage/autoTest/ComplexMultTaskPipeline";
+import TableGenerator from "../components/mainPage/TableGenerator";
+import TestTable from "../components/mainPage/TestTable";
 
 Vue.use(Router)
 
@@ -92,6 +95,19 @@ export default new Router({
           name: "AutoTestBatch",
           component: AutoTestBatch,
         },
+        {
+          path: "/ComplexMultTaskPipeline",
+          name: "ComplexMultTaskPipeline",
+          component: ComplexMultTaskPipeline,
+        }, {
+          path: "/TableGenerator",
+          name: "TableGenerator",
+          component: TableGenerator,
+        }, {
+          path: "/TestTable",
+          name: "TestTable",
+          component: TestTable,
+        }
       ],
     },
     {
