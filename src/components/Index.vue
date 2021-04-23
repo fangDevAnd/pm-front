@@ -13,31 +13,54 @@
                background-color="#545c64"
                text-color="#fff"
                active-text-color="#ffd04b">
-        <el-menu-item index="1" @click="changeRouter($event)" data-route="/pm">软件包管理</el-menu-item>
-        <el-menu-item index="2" @click="changeRouter($event)" data-route="/routeChange">路由控制</el-menu-item>
-        <el-menu-item index="3" @click="changeRouter($event)" data-route="/LogcatQuery">日志分析</el-menu-item>
-        <el-menu-item index="4" @click="changeRouter($event)" data-route="/UserBehavior">Lint代码检查</el-menu-item>
-        <el-menu-item index="5" @click="changeRouter($event)" data-route="/CheckReport">依赖检查报告</el-menu-item>
-        <el-menu-item index="8" @click="changeRouter($event)" data-route="/TableGenerator">表单生成器</el-menu-item>
-        <el-menu-item index="9" @click="changeRouter($event)" data-route="/TestTable">测试表单生成器</el-menu-item>
 
-        <el-submenu index="7">
+        <el-submenu index="1">
           <template slot="title">
-            <i class="el-icon-location"></i>
-            <span>自动测试</span>
+            <i class="el-icon-s-goods"></i>
+            <span>软件管理</span>
           </template>
-          <el-menu-item index="7-1" @click="changeRouter($event)" data-route="/TestProject">测试项目</el-menu-item>
-          <el-menu-item index="7-2" @click="changeRouter($event)" data-route="/ComplexMultTaskPipeline">多任务流水线</el-menu-item>
+          <el-menu-item index="1-1" @click="changeRouter($event)" data-route="/pm">软件包管理</el-menu-item>
+          <el-menu-item index="1-2" @click="changeRouter($event)" data-route="/routeChange">路由控制</el-menu-item>
+          <el-menu-item index="1-3" @click="changeRouter($event)" data-route="/LogcatQuery">日志分析</el-menu-item>
         </el-submenu>
 
 
-        <el-submenu index="6">
+        <el-submenu index="2">
           <template slot="title">
-            <i class="el-icon-location"></i>
+            <i class="el-icon-warning"></i>
+            <span>代码检查</span>
+          </template>
+          <el-menu-item index="2-1" @click="changeRouter($event)" data-route="/UserBehavior">Lint代码检查</el-menu-item>
+          <el-menu-item index="2-2" @click="changeRouter($event)" data-route="/CheckReport">依赖检查报告</el-menu-item>
+        </el-submenu>
+
+        <el-submenu index="3">
+          <template slot="title">
+            <i class="el-icon-s-help"></i>
+            <span>代码生成</span>
+          </template>
+          <el-menu-item index="3-1" @click="changeRouter($event)" data-route="/TableGenerator">表格生成器</el-menu-item>
+          <el-menu-item index="3-2" @click="changeRouter($event)" data-route="/TestTable">测试表格生成器</el-menu-item>
+        </el-submenu>
+
+
+        <el-submenu index="4">
+          <template slot="title">
+            <i class="el-icon-s-unfold"></i>
+            <span>自动测试</span>
+          </template>
+          <el-menu-item index="4-1" @click="changeRouter($event)" data-route="/TestProject">测试项目</el-menu-item>
+          <el-menu-item index="4-2" @click="changeRouter($event)" data-route="/ComplexMultTaskPipeline">多任务流水线
+          </el-menu-item>
+        </el-submenu>
+
+        <el-submenu index="5">
+          <template slot="title">
+            <i class="el-icon-menu"></i>
             <span>Crm内容管理</span>
           </template>
-          <el-menu-item index="6-1" @click="changeRouter($event)" data-route="/CrmMenu">Crm菜单设置</el-menu-item>
-          <el-menu-item index="6-2" @click="changeRouter($event)" data-route="/CrmPreViewer">Crm内容预览</el-menu-item>
+          <el-menu-item index="5-1" @click="changeRouter($event)" data-route="/CrmMenu">Crm菜单设置</el-menu-item>
+          <el-menu-item index="5-2" @click="changeRouter($event)" data-route="/CrmPreViewer">Crm内容预览</el-menu-item>
         </el-submenu>
 
         <el-menu-item @click="logout" type="danger">退出登录</el-menu-item>

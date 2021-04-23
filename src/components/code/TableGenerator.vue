@@ -6,6 +6,11 @@
 
   <div class="container">
 
+
+    <div>
+      <el-button type="primary">使用历史</el-button>
+    </div>
+    
     <div class="inner-container">
       <el-form ref="form" v-if="formGenerate" :model="form" class="form" label-width="150px">
         <!--
@@ -213,6 +218,20 @@
       </div>
     </div>
 
+
+    <el-dialog
+      title="代码生成结果"
+      append-to-body="true"
+      :visible.sync="generateVisable"
+      width="60%">
+      <div>{{generateCode}}</div>
+      <span slot="footer" class="dialog-footer">
+    <el-button @click="generateVisable = false">取 消</el-button>
+    <el-button type="primary" @click="generateVisable = false">确 定</el-button>
+  </span>
+    </el-dialog>
+
+
   </div>
 
 
@@ -220,6 +239,7 @@
 
 <script>
   import axios from "axios";
+  import Urls from "../../util/Urls";
 
   window.items = {};
 
@@ -227,17 +247,17 @@
     name: "TableGenerator",
     data() {
       return {
+        generateVisable: false,
 
+        generateCode: null,
         //存放表单数据
         form: {
           name: "name",
-          url: "http://123.56.93.253:8084/pm/logcat/list",
+          url: "http://localhost:8084/pm/logcat/list",
           method: "POST",
           header: "{\n" +
-            "    \"Authorization\":\n" +
-            "\t\"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJmYW5nIiwiY3JlYXRlZCI6MTYxODgxMTUwNTQ4MSwiYXV0aG9yaXRpZXMiOltdfQ.hmQKWGwv4dWi5ItHbsN2EOuEstwuE1hCKwFZXCxqTLWXIZY5L4uyR6skd31a3TbpjSpjZU7Kuk7AcoY3kujlRA\"\n" +
-            "}",
-          param: "{\"size\":8,\"page\":0}"
+            "    \"Authorization\":localStorage.getItem(\"token\")}",
+          param: "{\"size\":8,\"page\":1}"
 
         },
 
@@ -262,7 +282,6 @@
       }
     }, methods: {
       upMapper(index) {
-        console.log(index)
         let afterIndex = index - 1;
         let bridge = Object.create(this.tableMapper[index]);
         if (index > 0) {
@@ -329,14 +348,15 @@
         let url = item["url"];
         this.commonProcess(item);
         axios.get(url, {
-          headers: window.items["header"],
-          data: window.items["param"]
+          headers: JSON.parse(item.param),
+          data: JSON.parse(item.param)
         }).then((resp) => {
           this.processResult(resp, item);
         })
       },
 
       commonProcess(item) {
+        //这里使用eval的意义是，可能下面的几个参数存在参数运算
         if (item["header"] != null && item["header"].length > 0) {
           eval("window.items['header']=" + item["header"]);
         }
@@ -347,13 +367,16 @@
         if (window.items["header"] != undefined) {
           window.items["header"]["Content-Type"] = item.contentType;
         }
+        //转存到form中
+        item.param = JSON.stringify(window.items['param']);
+        item.header = JSON.stringify(window.items['header']);
       },
 
       postRequest(item) {
         let url = item["url"];
         this.commonProcess(item);
-        axios.post(url, window.items["param"], {
-          headers: window.items["header"],
+        axios.post(url, JSON.parse(item.param), {
+          headers: JSON.parse(item.header),
         }).then((resp) => {
           this.processResult(resp, item);
         })
@@ -362,11 +385,8 @@
       processResult(resp, item) {
         let data = resp.data;
         eval(this.form.parse);//可以对返回的数据进行加工
-
-
         this.parseResult(data);
       },
-
 
       //－－－－－－－－－－－－－－－－－－－网络执行
 
@@ -396,8 +416,6 @@
 
         //表格数据的显示取决于是否设置了显示
         this.tableData = netResp.data;
-
-
       },
 
 
@@ -408,28 +426,18 @@
         let param = this.form.param;
         param = JSON.parse(param);
 
-
-        let hasFilterQueryKey = [];
         //创建查询对象
         for (var i = 0; i < this.tableMapper.length; i++) {
           var mapper = this.tableMapper[i];
           if (mapper.isFilter) {
             if (mapper.isTimeFilter) {
-
               let timestart = mapper.mname + "_start";
               let timeend = mapper.mname + "_end";
-
               param[timestart] = mapper["startTime"];
               param[timeend] = mapper["endTime"];
-
-              hasFilterQueryKey.push(timestart);
-              hasFilterQueryKey.push(timeend);
-
             } else {
               param[mapper.mname] = mapper[mapper.mname];
-              hasFilterQueryKey.push(mapper.mname)
             }
-
           }
         }
 
@@ -446,7 +454,6 @@
           param.size = this.form.size;
         }
 
-        console.log(param)
         this.form.param = JSON.stringify(param);
         this.localQuery = true;
         this.request(this.form);
@@ -483,10 +490,20 @@
 
           let obj = {
             form: this.form,
-            tableMapper: this.tableMapper
+            tableMapper: this.displayTableMapper
           }
-          localStorage.setItem(value, JSON.stringify(obj));
+          // localStorage.setItem(value, JSON.stringify(obj));
 
+          let param = {
+            router: value,
+            formVal: JSON.stringify(JSON.stringify(obj)),
+          }
+          axios.post(Urls.urlRoot + "generator/router/add1", param).then((resp) => {
+            //保存数据
+            this.generateCode = resp.data;
+            this.generateVisable = true;
+
+          })
         }).catch(() => {
 
         });
