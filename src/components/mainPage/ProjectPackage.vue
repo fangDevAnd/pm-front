@@ -6,7 +6,6 @@
 
   <div style="width: 100%">
 
-
     <el-row :gutter="20">
       <el-col :span="6" v-for="(project,index) in projects">
         <el-card class="box-card" shadow="hover">

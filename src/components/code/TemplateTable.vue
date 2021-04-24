@@ -25,7 +25,7 @@
             </el-col>
           </div>
         </el-form-item>
-        <el-button type='primary' @click='onQuery'>查询</el-button>
+        <el-button type='primary' @click='onFilterQuery'>查询</el-button>
 
       </el-form>
     </div>
@@ -84,6 +84,12 @@
       }
     },
     methods: {
+
+      onFilterQuery() {
+        this.form.param.page = this.form.page;
+        this.onQuery();
+      },
+
       onQuery() {
         let param = this.form.param;
         for (var i = 0; i < this.tableMapper.length; i++) {
@@ -175,26 +181,32 @@
 
     created() {
 
-      var obj = "{\"form\":{\"name\":\"name\",\"url\":\"http://localhost:8084/pm/logcat/list\",\"method\":\"POST\",\"header\":\"{\\\"Authorization\\\":\\\"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJmYW5nIiwiY3JlYXRlZCI6MTYxOTA5NzM4MTI0MywiYXV0aG9yaXRpZXMiOltdfQ.srHL9L5n07ngv3fyqsF0pAVE0J7JBo_ZXXN-p5elUw2GPWS108gKFDBFWi1hzoehyAafgL7ydrKYnFyhe1NK7Q\\\",\\\"Content-Type\\\":\\\"application/json\\\"}\",\"param\":\"{\\\"size\\\":\\\"20\\\",\\\"page\\\":1}\",\"total\":136841,\"isMultSelect\":true,\"isPage\":true,\"size\":\"10\",\"page\":\"1\",\"oprate\":\"详情\",\"contentType\":\"application/json\"},\"tableMapper\":[{\"mname\":\"project\",\"txt\":\"当前的项目名称\",\"isDisplay\":true,\"isSort\":true,\"isFilter\":true},{\"mname\":\"imei\",\"txt\":\"编号\",\"isDisplay\":true,\"isSort\":true,\"isFilter\":true},{\"mname\":\"additionNumber\",\"txt\":\"附加参数\",\"isDisplay\":true,\"isSort\":true,\"isFilter\":true},{\"mname\":\"createTime\",\"txt\":\"创建时间\",\"isDisplay\":true,\"isSort\":true,\"isFilter\":true,\"isTimeFilter\":true},{\"mname\":\"level\",\"txt\":\"等级\",\"isDisplay\":true,\"isSort\":true,\"isFilter\":true},{\"mname\":\"info\",\"txt\":\"信息\",\"isDisplay\":true,\"isSort\":true,\"isFilter\":true},{\"mname\":\"tag\",\"txt\":\"标签\",\"isDisplay\":true,\"isSort\":true,\"isFilter\":true},{\"mname\":\"phone\",\"txt\":\"手机号\",\"isDisplay\":true,\"isSort\":true,\"isFilter\":true},{\"mname\":\"version\",\"txt\":\"版本\",\"isDisplay\":true,\"isSort\":true,\"isFilter\":true},{\"mname\":\"brand\",\"txt\":\"品牌\",\"isDisplay\":true,\"isSort\":true,\"isFilter\":true}]}";
+      var obj = "{\"form\":{\"name\":\"name\",\"url\":\"http://localhost:8084/pm/logcat/list\",\"method\":\"POST\",\"header\":\"{\\\"Authorization\\\":\\\"1.s.-\\\"}\",\"param\":\"{\\\"size\\\":\\\"20\\\",\\\"page\\\":1}\",\"paramExpression\":\"{\\\"size\\\":8,\\\"page\\\":1}\",\"headerExpression\":\"{\\n \\\"Authorization\\\":localStorage.getItem(\\\"token\\\")}\",\"total\":136841,\"isMultSelect\":true,\"isPage\":true,\"size\":\"20\",\"page\":\"1\",\"oprate\":\"1\"},\"tableMapper\":[{\"mname\":\"imei\",\"isDisplay\":true,\"isSort\":true},{\"mname\":\"additionNumber\",\"isDisplay\":true,\"isSort\":true},{\"mname\":\"createTime\",\"isDisplay\":true,\"isSort\":true},{\"mname\":\"level\",\"isDisplay\":true,\"isSort\":true},{\"mname\":\"info\",\"isDisplay\":true,\"isSort\":true},{\"mname\":\"brand\",\"isDisplay\":true,\"isSort\":true,\"isFilter\":true},{\"mname\":\"createTime_start\",\"isDisplay\":true,\"isSort\":true,\"isFilter\":true},{\"mname\":\"createTime_end\",\"isDisplay\":true,\"isSort\":true}]}"
 
       this.form = JSON.parse(obj).form;
-
       let param = this.form.param;
       param = JSON.parse(this.form.param);
+      let paramExpression;
+      eval("paramExpression=" + this.form.paramExpression);
+      for (var key in paramExpression) {
+        param[key] = paramExpression[key];
+      }
       this.form.param = param;
       let header = this.form.header;
       header = JSON.parse(this.form.header);
+      let headerExpression;
+      eval("headerExpression=" + this.form.headerExpression);
+      for (var key in headerExpression) {
+        header[key] = headerExpression[key];
+      }
       this.form.header = header;
-
       let operates = this.form.oprate.split(',');
       this.form.operates = operates;
-
       let localTableMapper = JSON.parse(obj).tableMapper;
       for (var i = 0; i < localTableMapper.length; i++) {
         localTableMapper[i].sort = localTableMapper[i].isSort ? 'custom' : false;
       }
       this.tableMapper = localTableMapper;
-
       this.onQuery();
     }
 

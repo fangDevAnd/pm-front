@@ -40,7 +40,9 @@
             <span>代码生成</span>
           </template>
           <el-menu-item index="3-1" @click="changeRouter($event)" data-route="/TableGenerator">表格生成器</el-menu-item>
-          <el-menu-item index="3-2" @click="changeRouter($event)" data-route="/TestTable">测试表格生成器</el-menu-item>
+          <el-menu-item index="3-2" @click="changeRouter($event)" data-route="/HistroyGenerate">生成记录</el-menu-item>
+          <el-menu-item index="3-3" @click="changeRouter($event)" data-route="/GenerateSetting">默认设置</el-menu-item>
+          <el-menu-item index="3-4" @click="changeRouter($event)" data-route="/Test">测试动态</el-menu-item>
         </el-submenu>
 
 

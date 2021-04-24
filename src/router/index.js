@@ -18,7 +18,10 @@ import TestItemList from "../components/mainPage/autoTest/TestItemList";
 import AutoTestBatch from "../components/mainPage/autoTest/AutoTestBatch";
 import ComplexMultTaskPipeline from "../components/mainPage/autoTest/ComplexMultTaskPipeline";
 import TableGenerator from "../components/code/TableGenerator";
-import TestTable from "../components/code/TestTable";
+import TemplateTable from "../components/code/TemplateTable";
+import Test from "../components/code/Test";
+import HistroyGenerate from "../components/code/HistroyGenerate";
+import GenerateSetting from "../components/code/GenerateSetting";
 
 
 Vue.use(Router)
@@ -105,10 +108,27 @@ export default new Router({
           name: "TableGenerator",
           component: TableGenerator,
         }, {
-          path: "/TestTable",
-          name: "TestTable",
-          component: TestTable,
+          path: "/TempleteTable",
+          name: "TempleteTable",
+          component: TemplateTable,
         },
+        {
+          path: "/Test",
+          name: "Test",
+          component: Test,
+        },
+        {
+          path: "/HistroyGenerate",
+          name: "HistroyGenerate",
+          component: HistroyGenerate,
+        },
+        {
+          path: "/GenerateSetting",
+          name: "GenerateSetting",
+          component: GenerateSetting,
+        },
+
+
       ],
     },
     {

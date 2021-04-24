@@ -6,11 +6,12 @@
 
   <div class="container">
 
-
-    <div>
-      <el-button type="primary">使用历史</el-button>
+    <div v-if="formVal==null" style="margin-bottom: 5px">
+      <el-tooltip class="item" effect="dark" content="使用构建的历史数据构建" placement="top-start">
+        <el-button type="primary" @click="histroyDialogVisible=true">使用历史</el-button>
+      </el-tooltip>
     </div>
-    
+
     <div class="inner-container">
       <el-form ref="form" v-if="formGenerate" :model="form" class="form" label-width="150px">
         <!--
@@ -170,11 +171,9 @@
                 </el-col>
               </div>
 
-
             </el-form-item>
 
-
-            <el-button type="primary" @click="onQuery">查询</el-button>
+            <el-button type="primary" @click="onFilterQuery">查询</el-button>
 
           </el-form>
         </div>
@@ -232,6 +231,20 @@
     </el-dialog>
 
 
+    <!--
+     历史构建
+    -->
+    <el-dialog
+      fullscreen="true"
+      append-to-body="true"
+      title="预览页面"
+      v-if="histroyDialogVisible"
+      :visible.sync="histroyDialogVisible"
+      width="90%">
+      <HistroyGenerate model="select"/>
+    </el-dialog>
+
+
   </div>
 
 
@@ -240,26 +253,24 @@
 <script>
   import axios from "axios";
   import Urls from "../../util/Urls";
+  import HistroyGenerate from "./HistroyGenerate";
 
   window.items = {};
 
   export default {
     name: "TableGenerator",
+    components: {HistroyGenerate},
     data() {
       return {
+
+        histroyDialogVisible: false,
+
+
         generateVisable: false,
 
         generateCode: null,
         //存放表单数据
-        form: {
-          name: "name",
-          url: "http://localhost:8084/pm/logcat/list",
-          method: "POST",
-          header: "{\n" +
-            "    \"Authorization\":localStorage.getItem(\"token\")}",
-          param: "{\"size\":8,\"page\":1}"
-
-        },
+        form: {},
 
         //存放表单映射
         tableMapper: [],
@@ -276,11 +287,27 @@
 
         localQuery: false,
 
-
         formGenerate: true,
 
       }
-    }, methods: {
+    },
+
+    props: [
+      "formVal" //当前的作用是用来进行传递表单的数据
+    ],
+    methods: {
+      //-----
+      historySelect(routerObj) {
+        this.histroyDialogVisible = false;
+        let obj = JSON.parse(routerObj.formVal);
+        if (obj != null) {
+          obj = JSON.parse(obj);
+          this.form = obj.form;
+          this.tableMapper = obj.tableMapper;
+          this.onSubmit();
+        }
+      },
+      //-----历史
       upMapper(index) {
         let afterIndex = index - 1;
         let bridge = Object.create(this.tableMapper[index]);
@@ -324,6 +351,11 @@
 
 
       execNet() {
+
+        //存放原始数据到本地存储中
+        localStorage.setItem("generate_code_param", this.form.param);
+        localStorage.setItem("generate_code_header", this.form.header);
+
         this.localQuery = false;
         this.request(this.form);
       },
@@ -367,14 +399,21 @@
         if (window.items["header"] != undefined) {
           window.items["header"]["Content-Type"] = item.contentType;
         }
+
+
+        //存放原始的表達式，因为当前的采纳数可能是动态的，也就是表达式，后台生成的数据部分应该是这个
+        item.paramExpression = localStorage.getItem("generate_code_param");
+        item.headerExpression = localStorage.getItem("generate_code_header");
         //转存到form中
         item.param = JSON.stringify(window.items['param']);
         item.header = JSON.stringify(window.items['header']);
+
       },
 
       postRequest(item) {
         let url = item["url"];
         this.commonProcess(item);
+
         axios.post(url, JSON.parse(item.param), {
           headers: JSON.parse(item.header),
         }).then((resp) => {
@@ -401,16 +440,19 @@
         if (!this.localQuery) {
           //设置请求映射
           let resItem = netResp.data[0];
+          console.log(resItem)
           let result = []
           for (var key in resItem) {
             result.push(key);
           }
+
           let mappers = [];
           for (let i = 0; i < result.length; i++) {
             mappers.push({
               mname: result[i]
             })
           }
+          console.log(mappers)
           this.tableMapper = mappers;
         }
 
@@ -418,10 +460,13 @@
         this.tableData = netResp.data;
       },
 
+      onFilterQuery() {
+        this.form.param.page = this.form.page;
+        this.onQuery();
+      },
 
       //生成表单的方法部分
       onQuery() {
-
         //额外的参数
         let param = this.form.param;
         param = JSON.parse(param);
@@ -492,8 +537,6 @@
             form: this.form,
             tableMapper: this.displayTableMapper
           }
-          // localStorage.setItem(value, JSON.stringify(obj));
-
           let param = {
             router: value,
             formVal: JSON.stringify(JSON.stringify(obj)),
@@ -535,10 +578,8 @@
     },
 
     created() {
-
-      //检查存储的数据和当前的路由是否相同，相同取出里面的数据，直接显示图表
-      let name = this.$route.name;
-      let obj = localStorage.getItem(name);
+      console.log(this.formVal)
+      let obj = JSON.parse(this.formVal);
       if (obj != null) {
         this.localQuery = true;
         this.formGenerate = false;
@@ -547,6 +588,9 @@
         this.tableMapper = obj.tableMapper;
         this.onSubmit();
       }
+    },
+
+    mounted() {
 
     }
 
