@@ -1,25 +1,27 @@
 <template>
-  <div style="width: 100%">
-
+  <div style="width: 100%" class="container">
 
     <el-page-header style="margin: 5px" @back="$router.back(-1)" v-bind:content="selectProject">
     </el-page-header>
 
-    <div style="margin-top: 20px" class="card-contain">
-      <div class="item-file" v-for="file in selectProjectFile">
-
-        <span style="margin-left: 20px">{{file}}</span>
-        <div style="margin-right: 20px">
-          <el-link :underline="false" type="normal" icon="el-icon-download" @click="download(file)">
-            下载
-          </el-link>
-          <el-link :underline="false" type="normal" icon="el-icon-picture-outline"
-                   @click="getQrCode(file)">生成二维码
-          </el-link>
+    <el-tabs>
+      <el-tab-pane v-model="panelModel" v-for="version in keys" :label="version+'_版本'" :name="version">
+        <div style="margin-top: 20px" class="card-contain">
+          <div class="item-file" v-for="file in versionList[version]">
+            <span style="margin-left: 20px">{{file}}</span>
+            <div style="margin-right: 20px">
+              <el-link :underline="false" type="normal" icon="el-icon-download" @click="download(file)">
+                下载
+              </el-link>
+              <el-link :underline="false" type="normal" icon="el-icon-picture-outline"
+                       @click="getQrCode(file)">生成二维码
+              </el-link>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
 
+      </el-tab-pane>
+    </el-tabs>
 
     <!--
  弹出
@@ -64,6 +66,12 @@
 
         dialogVisible: false,
         downSrcUrl: "",
+
+        versionList: {},
+
+        panelModel: 1,
+        keys: [],
+
       }
 
     },
@@ -73,6 +81,52 @@
       getProjectFile() {
         axios.get(Urls.urlRoot + "pm/list/file?project=" + this.selectProject).then((res) => {
           this.selectProjectFile = res.data.data;
+          //进行过滤排序
+          let branchList = {};
+          let keys = [];
+          for (let i = 0; i < res.data.data.length; i++) {
+            let dataItem = res.data.data[i];
+            let info = dataItem.split("__");
+            if (info.length == 1) {
+              //没有＿＿，不确定的版本
+              if (keys.indexOf("uncertain") == -1) {
+                keys.push("uncertain");
+              }
+              if (branchList["uncertain"] == undefined) {
+                branchList["uncertain"] = [];
+              }
+              branchList["uncertain"].push(dataItem);
+            } else if (info.length == 2) {
+              let versionInfo = info[1].split("_");
+              if (versionInfo.length == 1) {
+                versionInfo = versionInfo[0].split(".")[0];
+                if (keys.indexOf(versionInfo) == -1) {
+                  keys.push(versionInfo);
+                }
+                if (branchList[versionInfo] == undefined) {
+                  branchList[versionInfo] = [];
+                }
+                branchList[versionInfo].push(dataItem);
+                //主分支
+              } else if (versionInfo.length == 2) {
+                //开发分支
+                let info = versionInfo[1];
+                let version = info.substring(0, info.lastIndexOf("."));
+                if (keys.indexOf(version) == -1) {
+                  keys.push(version);
+                }
+                if (branchList[version] == undefined) {
+                  branchList[version] = [];
+                }
+                branchList[version].push(dataItem);
+              }
+            }
+          }
+
+          this.versionList = branchList;
+
+          this.keys = keys;
+
         })
       },
 
@@ -128,5 +182,9 @@
     padding-right: 20px;
   }
 
+
+  .container {
+    padding: 8px;
+  }
 
 </style>
